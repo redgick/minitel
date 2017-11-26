@@ -1,8 +1,6 @@
 #include <ESP8266WiFi.h>          // https://github.com/esp8266/Arduino
 
 // needed for library
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
 #include "WiFiManager.h"         // https://github.com/tzapu/WiFiManager
 
 std::unique_ptr<ESP8266WebServer> server;
@@ -38,22 +36,11 @@ void handleNotFound() {
 }
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
+  Serial.begin(4800, SERIAL_7E1);
+
   // WiFiManager
-  // Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
-  // reset saved settings
-  wifiManager.resetSettings();
-
-  // fetches ssid and pass from eeprom and tries to connect
-  // if it does not connect it starts an access point with the specified name
-  // here  "AutoConnectAP"
-  // and goes into a blocking loop awaiting configuration
-  // wifiManager.autoConnect("AutoConnectAP");
-  // or use this for auto generated name ESP + ChipID
-  wifiManager.autoConnect();
-
+  wifiManager.autoConnect("MinitelAP");
 
   server.reset(new ESP8266WebServer(WiFi.localIP(), 80));
 
@@ -61,7 +48,8 @@ void setup() {
 
   server->on("/minitel", []() {
     String message = server->arg(0);
-	Serial.println(message);
+    Serial.print(server->arg(0));
+    Serial.write("\r\n");
     server->send(200, "text/plain", message);
   });
 
@@ -73,6 +61,5 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   server->handleClient();
 }
